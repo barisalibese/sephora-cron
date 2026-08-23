@@ -42,11 +42,24 @@ jobs:
           SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
           MAIL_FROM: ${{ secrets.MAIL_FROM }}
           MAIL_TO: ${{ secrets.MAIL_TO }}
+          # ---- TEMPORARY TEST MODE ----------------------------------------
+          # GitHub's cron floor is 5 minutes, so the minute-by-minute cadence
+          # runs inside one job. Paired with the TEST target in config.yaml,
+          # this delivers one mail per minute. Revert: CHECKS=1 + drop the
+          # TEST target.
+          CHECKS: 4
+          # -----------------------------------------------------------------
         run: |
-          python -m watcher.main \
-            --config config.yaml \
-            --state state/state.json \
-            ${{ inputs.dry_run && '--dry-run' || '' }}
+          for i in $(seq 1 "$CHECKS"); do
+            echo "::group::check $i/$CHECKS"
+            python -m watcher.main \
+              --config config.yaml \
+              --state state/state.json \
+              ${{ inputs.dry_run && '--dry-run' || '' }}
+            echo "::endgroup::"
+            [ "$i" -lt "$CHECKS" ] && sleep 60
+          done
+          true
 
       - name: Persist state
         run: |

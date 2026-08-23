@@ -68,3 +68,19 @@ targets:
       Accept: "application/json"
       Origin: "https://widget.weezevent.com"
       Referer: "https://widget.weezevent.com/"
+
+  # ---- TEMPORARY TEST TARGET --------------------------------------------
+  # on_resale is False right now, so `equals False` is satisfied on every
+  # run, and `repeat: true` mails every time instead of only on the change.
+  # That is what produces one mail per minute. DELETE THIS BLOCK when done —
+  # it stops firing by itself once tickets go on sale (on_resale -> True).
+  - name: "TEST — her çalıştırmada mail"
+    url: "https://api.weezevent.com/ticket/widgets/resale-sephoria-london-2026?locale=en-gb"
+    json_path: "first_step.data.ticket-market-rates.event.on_resale"
+    json_mode: text
+    condition: equals
+    value: "False"
+    repeat: true
+    headers:
+      Accept: "application/json"
+  # -----------------------------------------------------------------------
