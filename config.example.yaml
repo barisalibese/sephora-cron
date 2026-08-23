@@ -1,0 +1,45 @@
+settings:
+  timeout: 20                 # seconds per HTTP request
+  notify_on_error_after: 3    # only mail about a broken target after N consecutive failures
+  subject_prefix: "[watcher]"
+  startup_notice: true          # self-test mail on the first run
+  heartbeat_days: 7             # 0 disables the "still alive" mail
+
+targets:
+  # 1. Price drop: mail me once when it goes under 1000
+  - name: "Ürün fiyatı"
+    url: "https://example.com/urun/42"
+    selector: ".product-price"
+    condition: lt
+    value: 1000
+
+  # 2. Back in stock: mail me when the page stops saying "Tükendi"
+  - name: "Stok durumu"
+    url: "https://example.com/urun/42"
+    selector: "#availability"
+    condition: not_contains
+    value: "Tükendi"
+
+  # 3. Anything at all changed on a listing (default rule, no `value` needed)
+  - name: "İlan listesi"
+    url: "https://example.com/ilanlar"
+    selector: "ul.listings li:first-child a"
+    condition: changed
+
+  # 4. Pull a value out of noisy text, and nag me every run while it holds
+  - name: "Sunucu durumu"
+    url: "https://example.com/status"
+    selector: "#banner"
+    regex_extract: "durum: (\\w+)"
+    condition: equals
+    value: "kapalı"
+    repeat: true
+
+  # 5. Read an attribute instead of the text, with a custom header
+  - name: "Son sürüm"
+    url: "https://example.com/downloads"
+    selector: "a.download-latest"
+    attr: "href"
+    condition: changed
+    headers:
+      Accept-Language: "tr-TR,tr;q=0.9"

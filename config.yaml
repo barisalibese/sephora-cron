@@ -1,0 +1,70 @@
+settings:
+  timeout: 20
+  notify_on_error_after: 3
+  subject_prefix: "[SEPHORiA]"
+  startup_notice: true          # one self-test mail on the very first cron run
+  heartbeat_days: 7             # weekly "still alive" mail so silence is never ambiguous
+
+# SEPHORiA LONDON 2026 resale watch.
+#
+# The public page (sites.weezevent.com/sephoria-london) is a React SPA, so its
+# HTML carries no ticket data. The widget reads this JSON API instead, and the
+# "0 x Tickets / Tickets are unavailable" box on screen is literally an empty
+# `rates` array plus a populated `errors` array in the payload below.
+#
+# Four independent signals watch the same event, so a change in any one of
+# Weezevent's flags still reaches you. They fire together into a single mail.
+targets:
+  # 1. PRIMARY — the ticket list itself stops being empty.
+  - name: "Bilet sayısı (rates)"
+    url: "https://api.weezevent.com/ticket/widgets/resale-sephoria-london-2026?locale=en-gb"
+    json_path: "first_step.data.ticket-market-rates.rates"
+    json_mode: count
+    condition: gt
+    value: 0
+    repeat: true                # keep mailing every run while tickets are up
+    headers:
+      # Verified optional: the endpoint answers a bare request with no auth,
+      # no cookie and no rate limiting. Kept only so the traffic looks like
+      # the widget's own. See README, "No token is involved".
+      Accept: "application/json"
+      Origin: "https://widget.weezevent.com"
+      Referer: "https://widget.weezevent.com/"
+
+  # 2. The "Tickets are unavailable at the moment" banner disappears.
+  - name: "Uyarı mesajı kalktı (errors)"
+    url: "https://api.weezevent.com/ticket/widgets/resale-sephoria-london-2026?locale=en-gb"
+    json_path: "first_step.data.ticket-market-rates.errors"
+    json_mode: count
+    condition: equals
+    value: "0"
+    repeat: true
+    headers:
+      Accept: "application/json"
+      Origin: "https://widget.weezevent.com"
+      Referer: "https://widget.weezevent.com/"
+
+  # 3. Weezevent flips the event into resale mode.
+  - name: "Resale açıldı (on_resale)"
+    url: "https://api.weezevent.com/ticket/widgets/resale-sephoria-london-2026?locale=en-gb"
+    json_path: "first_step.data.ticket-market-rates.event.on_resale"
+    json_mode: text
+    condition: equals
+    value: "True"
+    repeat: true
+    headers:
+      Accept: "application/json"
+      Origin: "https://widget.weezevent.com"
+      Referer: "https://widget.weezevent.com/"
+
+  # 4. EARLY WARNING — the widget leaves the waiting-list flow for any other
+  #    step. Fires on any change, so it catches shapes 1-3 do not predict.
+  - name: "Akış değişti (slug)"
+    url: "https://api.weezevent.com/ticket/widgets/resale-sephoria-london-2026?locale=en-gb"
+    json_path: "first_step.slug"
+    json_mode: text
+    condition: changed
+    headers:
+      Accept: "application/json"
+      Origin: "https://widget.weezevent.com"
+      Referer: "https://widget.weezevent.com/"
