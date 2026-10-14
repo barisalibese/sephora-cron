@@ -1,32 +1,32 @@
 {
   "meta": {
     "started_at": "2026-08-23T18:11:50+00:00",
-    "last_notified_at": "2026-10-12T07:19:39+00:00"
+    "last_notified_at": "2026-10-14T17:04:14+00:00"
   },
   "targets": {
     "Akış değişti (slug)": {
-      "value": "ticket-resale-market-waiting-list",
-      "fired": false,
+      "value": "0-queue",
+      "fired": true,
       "error_streak": 0,
-      "checked_at": "2026-10-12T07:19:39+00:00"
+      "checked_at": "2026-10-14T17:04:14+00:00"
     },
     "Bilet sayısı (rates)": {
       "value": "0",
       "fired": false,
       "error_streak": 0,
-      "checked_at": "2026-10-12T07:19:39+00:00"
+      "checked_at": "2026-10-14T17:04:14+00:00"
     },
     "Resale açıldı (on_resale)": {
       "value": "False",
       "fired": false,
-      "error_streak": 0,
-      "checked_at": "2026-10-12T07:19:39+00:00"
+      "error_streak": 1,
+      "checked_at": "2026-10-14T17:04:14+00:00"
     },
     "Uyarı mesajı kalktı (errors)": {
       "value": "1",
       "fired": false,
-      "error_streak": 0,
-      "checked_at": "2026-10-12T07:19:39+00:00"
+      "error_streak": 1,
+      "checked_at": "2026-10-14T17:04:14+00:00"
     }
   }
 }
